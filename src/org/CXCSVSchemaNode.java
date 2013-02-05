@@ -25,12 +25,9 @@ public class CXCSVSchemaNode extends CXTreeNode<CXCSVSchemaNode>{
 	 * 
 	 * @param startIdx
 	 * @param endIdx
-	 * @param name
-	 * @param childNames might be null; should have more than endIdx children
-	 *  if not null.
+	 * @param name might be null
 	 */
-	public CXCSVSchemaNode (int startIdx, int endIdx, String name, 
-			String[] childNames)
+	public CXCSVSchemaNode (int startIdx, int endIdx, String name)
 	{
 		assert(startIdx <= endIdx);
 		
@@ -40,11 +37,9 @@ public class CXCSVSchemaNode extends CXTreeNode<CXCSVSchemaNode>{
 		if (startIdx == endIdx)
 			return;
 
-		assert(childNames.length > endIdx);
-		
 		for (int i = startIdx; i <= endIdx; i++)
 		{
-			this.addChild(new CXCSVSchemaNode(i, i, childNames[i], null));
+			this.addChild(new CXCSVSchemaNode(i, i, null));
 		}
 	}
 	

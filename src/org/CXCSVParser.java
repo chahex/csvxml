@@ -18,7 +18,7 @@ public class CXCSVParser{
 	public CXNode parseCSV(String line)
 	{
 		assert(line != null);
-		return parseCSV(line, null);
+		return parseCSV(line, null, null);
 	}
 	
 	/**
@@ -28,7 +28,8 @@ public class CXCSVParser{
 	 * @param schema
 	 * @return
 	 */
-	public CXNode parseCSV(String line, CXCSVSchemaNode schema)
+	public CXNode parseCSV(String line, CXCSVSchemaNode schema, 
+			String[] colNames)
 	{
 		assert(line != null);
 		String strs[] = splitLine(line);
@@ -38,14 +39,18 @@ public class CXCSVParser{
 		if (schema == null)
 		{
 			schema = new CXCSVSchemaNode(0, strs.length-1, 
-					DEFAULT_ELEMENT_NAME, generateColNames(strs.length));
+					DEFAULT_ELEMENT_NAME);
 		} else
 		{
 			// check integrity
 			assert(strs.length == (schema.endIdx - schema.startIdx + 1));
 		}
+		if (colNames == null)
+		{
+			colNames = generateColNames(strs.length);
+		}
 		
-		return generateSubNodes(strs, schema);
+		return generateSubNodes(strs, schema, colNames);
 	}
 	
 	private String[] generateColNames(int length)
@@ -68,9 +73,18 @@ public class CXCSVParser{
 	 * @param schema
 	 * @return
 	 */
-	private CXNode generateSubNodes(String[] strs, CXCSVSchemaNode schema)
+	private CXNode generateSubNodes(String[] strs, CXCSVSchemaNode schema, 
+			String[] colNames)
 	{
-		CXNode root = new CXNode(schema.name);
+		String nodeName = schema.name;
+		// by default, if node name not specified by schema node, it will
+		// be the name of the its initial column's name
+		if (nodeName == null)
+		{
+			nodeName = colNames[schema.startIdx];
+		}
+			
+		CXNode root = new CXNode(nodeName);
 		List<CXCSVSchemaNode> childrenSchema = schema.children;
 		if (childrenSchema == null)
 		{
@@ -81,7 +95,7 @@ public class CXCSVParser{
 			for (int i = 0; i < childrenSchema.size(); i++)
 			{
 				CXCSVSchemaNode childSchema = childrenSchema.get(i);
-				CXNode child = generateSubNodes(strs, childSchema);
+				CXNode child = generateSubNodes(strs, childSchema, colNames);
 				root.addChild(child);
 			}
 		}

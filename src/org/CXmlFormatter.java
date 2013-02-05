@@ -5,33 +5,20 @@ import java.util.List;
 
 public class CXmlFormatter {
 	
-	/**
-	 * Replace <, >, ", /(??? maybe problematic appeared in tag name) 
-	 * 
-	 * @param str
-	 * @return
-	 */
-	private String sanityCheck(String str)
-	{
-		if (str == null || str.length() == 0)
-			return str;
-		return str.replace("&", "&amp;").replace("<", "&lt;")
-				.replace(">", "&gt;").replace("\"", "&quot;");
-	}
 	
 	private StringBuilder formatXML(CXNode node, StringBuilder sb)
 	{
 		assert(sb != null);
 		assert(node != null);
 		
-		String name = sanityCheck(node.getName());
+		String name = Util.sanityCheck(node.getName());
 		sb.append(String.format("<%s", name));
 		boolean firstTagEnded = false;
 
 		String content = node.getContent();
 		if (content != null)
 		{
-			content = sanityCheck(content);
+			content = Util.sanityCheck(content);
 			sb.append(">").append(content)
 				.append("");
 			firstTagEnded = true;

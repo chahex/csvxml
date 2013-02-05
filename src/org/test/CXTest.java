@@ -11,7 +11,7 @@ import org.junit.Test;
 public class CXTest {
 	
 	static String[] NAMES = {"<id>", "&firstname", "\"lastname\"", "weaponheld", 
-		"battlian"};
+		"battalian"};
 	static String DATA = "1,xinkai,he,ak-47,m213";
 	
 	CXCSVSchemaNode schema;
@@ -23,13 +23,13 @@ public class CXTest {
 	@Before
 	public void setUp() throws Exception {
 		schema = new CXCSVSchemaNode(0, 
-				NAMES.length - 1, "root", NAMES);
+				NAMES.length - 1, "root");
 		
-		CXCSVSchemaNode child = new CXCSVSchemaNode(1, 2, "knownas", NAMES);
+		CXCSVSchemaNode child = new CXCSVSchemaNode(1, 2, "knownas");
 		schema.addChild(child);
 		
 		parser = new CXCSVParser();
-		node = parser.parseCSV(DATA, schema);
+		node = parser.parseCSV(DATA, schema, NAMES);
 		
 		formatter = new CXmlFormatter();
 	}
@@ -46,7 +46,7 @@ public class CXTest {
 	
 	@Test
 	public void testParser() {
-		CXNode node = parser.parseCSV(DATA, schema);
+		CXNode node = parser.parseCSV(DATA, schema, NAMES);
 		System.out.println(node);
 	}
 	

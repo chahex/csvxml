@@ -1,8 +1,16 @@
 package org.main;
 
-import java.util.StringTokenizer;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 
+import org.CXCSVParser;
 import org.CXCSVSchemaNode;
+import org.CXmlFormatter;
+import org.Util;
 
 public class Main {
 
@@ -11,43 +19,81 @@ public class Main {
 		System.out.printf(format, args);
 	}
 	
-	// (a,0,10,((b,1,5,((d,2,4))),(c,6,7)))
-	// the output should be the CXNode that have multiple layer of 
-	// child nodes
-	// (name,startIndex,endIndex,(child nodes))
-	private CXCSVSchemaNode parseCXSchema(String in)
-	{
-		assert(in!=null);
-		return null;
-	}
 	
-	/* Return the parsed length
-	 * The startPt should be right after the "(" and is the place 
-	 * the name start 
-	 * */
-	private int parseCXSchema(String in, int startPt, CXCSVSchemaNode parent)
-	{
-		assert(parent != null);
-		int len = 0;
-		int thisEnd = in.indexOf(",(", startPt);
-
-		// no children nodes found
-		if (thisEnd == -1)
-		{
-			thisEnd = in.length() - 1;
-		}
-		String[] vals = in.substring(startPt, thisEnd).split(",");
-		CXCSVSchemaNode node = new CXCSVSchemaNode(Integer.parseInt(vals[1]), 
-				Integer.parseInt(vals[2]), vals[0], null);
-		return -1;
-	}
-
-	private void usage()
+	private static void usage()
 	{
 		printf("CSV to XML converter\n");
+		printf("Usage:\n");
+		printf("cxconverter [src filename] [dst filename] [root element name] [schema expression]\n");
+		printf("It is not necessary to specify schema expression, as the converter will output each line as an entity and each column as its child.\n");
+		printf("When specifying expression, must also specify root element name.\n");
 	}
 
 	public static void main(String[] args) {
-	    
+		if (args.length < 2)
+		{
+			usage();
+			System.exit(0);
+		}
+		
+		if (args.length == 3)
+		{
+			usage();
+			System.exit(1);
+		} 
+
+		BufferedReader in = null;
+		PrintWriter out = null;
+		String rootName = null;
+		String expression = null;
+		CXCSVSchemaNode schemaNode = null;
+		CXCSVParser parser = new CXCSVParser();
+		CXmlFormatter formatter = new CXmlFormatter();
+		String[] colNames = null;
+		
+		if (args.length == 2)
+			rootName = "root";
+		else
+		{
+			rootName = Util.sanityCheck(args[2]);
+			expression = args[3];
+			CXCSVSchemaNode[] tmpNodes = new CXCSVSchemaNode[]{schemaNode};
+		}
+		
+		try{
+			in = new BufferedReader(new FileReader(args[0]));
+			out = new PrintWriter(new FileWriter(args[1]));
+			// the first line should be header
+			String str = null;
+			str = in.readLine();
+			colNames = str.split(",");
+			
+			// ignore writing XML headers now
+			out.printf("<%s>\n", rootName);
+			while ((str = in.readLine()) != null)
+			{
+				out.print(
+						formatter.formatNode2XML(
+								parser.parseCSV(str, schemaNode, colNames)));
+			}
+			out.printf("</%s>\n", rootName);
+
+		}catch(FileNotFoundException e)
+		{
+			e.printStackTrace();
+		} catch (IOException e) {
+	        e.printStackTrace();
+        } finally
+        {
+        	try {
+
+        		if (in != null)  in.close();
+        		if (out != null) out.close();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+		
     }
 }
