@@ -3,10 +3,12 @@ package org.test;
 import org.CXCSVParser;
 import org.CXCSVSchemaNode;
 import org.CXNode;
+import org.CXSchemaExParser;
 import org.CXmlFormatter;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.main.CXConverter;
 
 public class CXTest {
 	
@@ -17,6 +19,7 @@ public class CXTest {
 	CXCSVSchemaNode schema;
 	CXCSVParser parser;
 	CXNode node;
+	CXSchemaExParser schemaParser;
 	
 	CXmlFormatter formatter;
 	
@@ -32,6 +35,8 @@ public class CXTest {
 		node = parser.parseCSV(DATA, schema, NAMES);
 		
 		formatter = new CXmlFormatter();
+		
+		schemaParser = new CXSchemaExParser();
 	}
 
 	@After
@@ -53,5 +58,20 @@ public class CXTest {
 	@Test
 	public void test2XML() {
 		System.out.println(formatter.formatNode2XML(node));
+	}
+	
+	//@Test
+	public void testConverter() {
+		String[] args = {"wb1.csv","wb1.xml","roster","(people,0,3,((knownas,1,2)))"};
+		CXConverter.main(args);
+	}
+	
+	
+	@Test
+	public void testExplainer()
+	{
+		String exp =  "(a,0,10,((b,1,5,((d,6,7))),(c,2,4)))";
+		CXCSVSchemaNode node = schemaParser.parseCXSchema(exp);
+		System.out.println(schemaParser.explain2Expression(node));
 	}
 }

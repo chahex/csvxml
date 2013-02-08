@@ -2,8 +2,10 @@ package org;
 
 public class Util {
 	/**
-	 * Replace <, >, ", /(??? maybe problematic appeared in tag name) 
+	 * Replace <, >, ",  
+	 * with &lt; &gt; &quot;
 	 * 
+	 * ??? "/" may also be problematic appeared in tag name)
 	 * @param str
 	 * @return
 	 */

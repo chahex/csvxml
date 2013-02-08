@@ -43,6 +43,21 @@ public class CXCSVSchemaNode extends CXTreeNode<CXCSVSchemaNode>{
 		}
 	}
 
+	/**
+	 * Only when the node's index range is a subset of this node, can it
+	 * be added as a child node.
+	 * 
+	 * A subset is defined as:
+	 * 
+	 * 		node.startIdx >= this.startIdx
+	 * 		node.endIdx <= this.startIdx
+	 * 
+	 * Note: it can be inferred that the node have same index range with this
+	 * node, whether this node's startIdx = endIdx or not.
+	 * 
+	 * During the addition of the node, previous children within the index 
+	 * 		range of the node are eliminated. This 
+	 */
 	@Override
 	public void addChild(CXCSVSchemaNode node) {
 

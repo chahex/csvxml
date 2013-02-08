@@ -1,5 +1,15 @@
 package org;
 
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * The converter uses a simple expression to specify mapping rule between
+ * CSV columns and XML document objects. 
+ * 
+ * @author xinkaihe
+ *
+ */
 public class CXSchemaExParser {
 	
 	// ([name],[start index],[end index],
@@ -19,7 +29,7 @@ public class CXSchemaExParser {
 		/**
 		 * Parse the expression to build CSVSchemaNode
 		 * If the first element in the array passed in is null, then return
-		 * the CXCSVSchemaNode parsed using to the first element of the array;
+		 * the CXCSVSchemaNode parsed to the first element of the array;
 		 * Otherwise add the parsed node as child node to the first element of the 
 		 * array.
 		 * 
@@ -42,7 +52,7 @@ public class CXSchemaExParser {
 			if (thisEnd == -1 || in.substring(startPt, thisEnd).contains(")"))
 			{
 				thisEnd = in.indexOf(")", startPt);
-				System.out.printf("StartPt:%d, endPt%d", startPt, thisEnd);
+				// System.out.printf("StartPt:%d, endPt%d", startPt, thisEnd);
 			} else {
 				hasChild = true;
 			}
@@ -78,6 +88,62 @@ public class CXSchemaExParser {
 			// return the length of the string already parsed
 			return thisEnd - startPt + 1;
 		}
-	
+		
+		public String explain2Expression(CXCSVSchemaNode node)
+		{
+			assert(node != null);
+			assert(node.name != null);
+			StringBuilder sb = new StringBuilder();
+			explainNode(node, sb);
+			return sb.toString();
+		}
+		
+		private void explainNode(CXCSVSchemaNode node, 
+				StringBuilder sb)
+		{
+			assert(sb != null);
+			// parent decides whether to explain or not
+			// this node only print out the string
+			sb.append(String.format("(%s,%d,%d", node.name, 
+					node.startIdx, node.endIdx));
+			List<CXCSVSchemaNode> children = node.getChildren();
+			// append children
+			if (children.size() != 0)
+			{
+				List<StringBuilder> csbList 
+					= new ArrayList<StringBuilder>();
+				// iterate through children
+				for (CXCSVSchemaNode child : children)
+				{
+					// not append only when name is null and startIdx == endIdx
+					// assumption: name can't be empty string
+					if ((child.startIdx ==child.endIdx) && child.name == null)
+					{
+						continue;
+					} else
+					{
+						StringBuilder csb = new StringBuilder();
+						explainNode(child, csb);
+						csbList.add(csb);
+					}
+				}
+				int bound = csbList.size() - 1; // upper index of the array
+				if (csbList.size() > 0)
+				{
+					sb.append(",(");
+					for (int i = 0; i <= bound; i++)
+					{
+						sb.append(csbList.get(i));
+						// append comma when not the last element
+						if (i != bound)
+						{
+							sb.append(',');
+						}
+					}
+					sb.append(")"); // print the ending parentheses of children
+				}
+			}
+			// print the ending parentheses
+			sb.append(")");
+		}
 }
-

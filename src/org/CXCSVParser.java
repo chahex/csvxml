@@ -34,7 +34,7 @@ public class CXCSVParser{
 		assert(line != null);
 		String strs[] = splitLine(line);
 		
-		// for empty column names, generate column names based on 
+		// for null column names, generate column names based on 
 		// the size of the line
 		if (schema == null)
 		{

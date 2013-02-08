@@ -3,8 +3,14 @@ package org;
 import java.util.List;
 
 
+/**
+ * Format XML output based on document structure defined by CXNode tree.
+ * Currently does not support attribute output. 
+ * 
+ * @author xinkaihe
+ *
+ */
 public class CXmlFormatter {
-	
 	
 	private StringBuilder formatXML(CXNode node, StringBuilder sb)
 	{
@@ -16,7 +22,7 @@ public class CXmlFormatter {
 		boolean firstTagEnded = false;
 
 		String content = node.getContent();
-		if (content != null)
+		if (content != null && content.length() != 0)
 		{
 			content = Util.sanityCheck(content);
 			sb.append(">").append(content)

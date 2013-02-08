@@ -1,5 +1,13 @@
 package org;
 
+/**
+ * Basic structure of document. An node have string content, a list of 
+ * child nodes and attributes.
+ * 
+ * 
+ * @author xinkaihe
+ *
+ */
 public class CXNode extends CXTreeNode<CXNode>{
 	
 	java.util.Map<String, String> attributes; 

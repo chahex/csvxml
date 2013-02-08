@@ -9,16 +9,19 @@ import java.io.PrintWriter;
 
 import org.CXCSVParser;
 import org.CXCSVSchemaNode;
+import org.CXSchemaExParser;
 import org.CXmlFormatter;
 import org.Util;
 
-public class Main {
+public class CXConverter {
+	
+	private static int FLUSH_THRESHOLD = 1024 * 10;
 
+	
 	private static void printf(String format, Object ... args)
 	{
 		System.out.printf(format, args);
 	}
-	
 	
 	private static void usage()
 	{
@@ -30,6 +33,7 @@ public class Main {
 	}
 
 	public static void main(String[] args) {
+		
 		if (args.length < 2)
 		{
 			usage();
@@ -49,7 +53,10 @@ public class Main {
 		CXCSVSchemaNode schemaNode = null;
 		CXCSVParser parser = new CXCSVParser();
 		CXmlFormatter formatter = new CXmlFormatter();
+		CXSchemaExParser schemaParser = new CXSchemaExParser();
 		String[] colNames = null;
+		
+		int charsWritten = 0;
 		
 		if (args.length == 2)
 			rootName = "root";
@@ -57,7 +64,7 @@ public class Main {
 		{
 			rootName = Util.sanityCheck(args[2]);
 			expression = args[3];
-			CXCSVSchemaNode[] tmpNodes = new CXCSVSchemaNode[]{schemaNode};
+			schemaNode = schemaParser.parseCXSchema(expression);
 		}
 		
 		try{
@@ -72,24 +79,28 @@ public class Main {
 			out.printf("<%s>\n", rootName);
 			while ((str = in.readLine()) != null)
 			{
-				out.print(
-						formatter.formatNode2XML(
-								parser.parseCSV(str, schemaNode, colNames)));
+				String outStr = formatter.formatNode2XML(
+						parser.parseCSV(str, schemaNode, colNames)); 
+				out.print(outStr);
+				charsWritten += outStr.length();
+				if (charsWritten >= FLUSH_THRESHOLD)
+					out.flush();
 			}
 			out.printf("</%s>\n", rootName);
+			out.flush();
 
 		}catch(FileNotFoundException e)
 		{
 			e.printStackTrace();
+			System.exit(2);
 		} catch (IOException e) {
 	        e.printStackTrace();
+	        System.exit(3);
         } finally
         {
         	try {
-
         		if (in != null)  in.close();
         		if (out != null) out.close();
-
             } catch (IOException e) {
                 e.printStackTrace();
             }
