@@ -5,9 +5,9 @@ import java.util.Iterator;
 /**
  * This class defines the internal structure of a line of CSV.
  * Each node will also have a list of children nodes and a parent node.
- * 
- * Initially, all the column will be mapped to nodes instead of attributes.
- * 
+ *
+ * Currently, all the columns will be mapped to nodes instead of attributes.
+ *
  * @author xinkaihe
  *
  */
@@ -19,10 +19,10 @@ public class CXCSVSchemaNode extends CXTreeNode<CXCSVSchemaNode>{
 	int endIdx;
 	/** The name of this node */
 	String name;
-	
+
 	/**
 	 * The column at endIdx will not be included
-	 * 
+	 *
 	 * @param startIdx
 	 * @param endIdx
 	 * @param name might be null
@@ -30,7 +30,7 @@ public class CXCSVSchemaNode extends CXTreeNode<CXCSVSchemaNode>{
 	public CXCSVSchemaNode (int startIdx, int endIdx, String name)
 	{
 		assert(startIdx <= endIdx);
-		
+
 		this.startIdx = startIdx;
 		this.endIdx = endIdx;
 		this.name = name;
@@ -42,10 +42,10 @@ public class CXCSVSchemaNode extends CXTreeNode<CXCSVSchemaNode>{
 			this.addChild(new CXCSVSchemaNode(i, i, null));
 		}
 	}
-	
+
 	@Override
 	public void addChild(CXCSVSchemaNode node) {
-		
+
 		if (children != null)
 		{
 			// remove the children at column overlap the new child
@@ -53,7 +53,7 @@ public class CXCSVSchemaNode extends CXTreeNode<CXCSVSchemaNode>{
 		    for (CXCSVSchemaNode child = null; ite.hasNext();)
 		    {
 		    	child = ite.next();
-		    	if (child.startIdx >= node.startIdx 
+		    	if (child.startIdx >= node.startIdx
 		    			&& child.endIdx <= node.endIdx)
 		    	{
 		    		ite.remove();
@@ -62,6 +62,10 @@ public class CXCSVSchemaNode extends CXTreeNode<CXCSVSchemaNode>{
 		}
 	    super.addChild(node);
 	}
+	
+	public int getStartIdx() {    	return startIdx;    }
+	public int getEndIdx() {    	return endIdx;    }
+	public String getName() {    	return name;    }
 
 	@Override
     public String toString() {
