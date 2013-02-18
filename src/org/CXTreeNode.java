@@ -43,5 +43,9 @@ public abstract class CXTreeNode<T extends CXTreeNode>{
 	public List<T> getChildren() {
 		return new ArrayList<T>(children);
     }
+	
+	public int childrenCount() {
+		return this.children.size();
+	}
 
 }

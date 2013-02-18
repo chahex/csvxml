@@ -2,7 +2,6 @@ package org;
 
 import java.util.List;
 
-
 /**
  * Format XML output based on document structure defined by CXNode tree.
  * Currently does not support attribute output. 

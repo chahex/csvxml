@@ -56,7 +56,7 @@ public class CXCSVSchemaNode extends CXTreeNode<CXCSVSchemaNode>{
 	 * node, whether this node's startIdx = endIdx or not.
 	 * 
 	 * During the addition of the node, previous children within the index 
-	 * 		range of the node are eliminated. This 
+	 * 		range of the node are eliminated.
 	 */
 	@Override
 	public void addChild(CXCSVSchemaNode node) {
@@ -77,7 +77,7 @@ public class CXCSVSchemaNode extends CXTreeNode<CXCSVSchemaNode>{
 		}
 	    super.addChild(node);
 	}
-	
+
 	public int getStartIdx() {    	return startIdx;    }
 	public int getEndIdx() {    	return endIdx;    }
 	public String getName() {    	return name;    }

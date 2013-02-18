@@ -74,7 +74,7 @@ public class CXConverter {
 			String str = null;
 			str = in.readLine();
 			colNames = str.split(",");
-			
+
 			// ignore writing XML headers now
 			out.printf("<%s>\n", rootName);
 			while ((str = in.readLine()) != null)
@@ -86,7 +86,7 @@ public class CXConverter {
 				if (charsWritten >= FLUSH_THRESHOLD)
 					out.flush();
 			}
-			out.printf("</%s>\n", rootName);
+			out.printf("</%s>", rootName);
 			out.flush();
 
 		}catch(FileNotFoundException e)
