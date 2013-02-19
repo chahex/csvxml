@@ -1,8 +1,31 @@
 package org;
 
+/**
+ * The CXSchema provides a schema to map CSV columns to output XML.
+ * <br>
+ * It provides configurations as well a description of output XML structure. 
+ * And assumes one line of CSV content will be mapped to one XML tag in the
+ * output XML document.
+ * 
+ * <br>
+ * The configurations include:<br>
+ * * The root element name of the output XML rootName, default value is defined
+ * 		in DEFAULT_ROOT_NAME
+ * 
+ * <br>
+ * 
+ * The XML structure is defined in schemaNode field variable.
+ * see {@link org.CXSchemaNode}
+ * 
+ * 
+ * 
+ * @author xinkaihe
+ *
+ */
 public class CXSchema {
-	
+
 	public static final String DEFAULT_ROOT_NAME = "root";
+
 	public static final String CXROOT = "cx";
 	public static final String ROOT_NAME = "root_name";
 	public static final String CXNODE = "cxnode";
@@ -28,7 +51,8 @@ public class CXSchema {
 
 	public void setRootName(String rootName) {
 		if (rootName == null || rootName.length()==0)
-			throw new NullPointerException("Root name specified by schema can't be null or empty.");
+			throw new NullPointerException("Root name specified by " +
+					"schema can't be null or empty.");
     	this.rootName = rootName;
     }
 
@@ -64,5 +88,5 @@ public class CXSchema {
 		    return false;
 	    return true;
     }
-	
+
 }

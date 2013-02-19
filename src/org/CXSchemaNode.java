@@ -1,15 +1,20 @@
 package org;
 
-import java.util.Comparator;
 import java.util.List;
 
-class CXSchNodeIdxComparator implements Comparator<CXSchemaNode> {
-	@Override
-	public int compare(CXSchemaNode o1, CXSchemaNode o2) {
-		return 0;
-	}
-}
-
+/**
+ * CXSchemaNode defines a structure template for XML output.
+ * It includes following features:<br>
+ * 
+ * 	* One CXSchemaNode is mapped to one XML documet tag (maybe extended to 
+ * 		attributes as well)
+ *  * name field indicates the name of the tag
+ *  * contentSrc field indicates the column number from the source CSV file
+ *  * children are children tags that have the same structure
+ *
+ * @author xinkaihe
+ *
+ */
 public class CXSchemaNode extends CXTreeNode<CXSchemaNode> {
 
 	// can't be null or empty
@@ -20,8 +25,8 @@ public class CXSchemaNode extends CXTreeNode<CXSchemaNode> {
 
 	/**
 	 * The overriden method will sort the children array while inserting.
-	 * However, the CXTreeNode's addChild method will easily disrupt this 
-	 * order if called upon this object using reflection.
+	 * However, the CXTreeNode(super)'s addChild method will easily 
+	 * disrupt this order if called upon this object using reflection.
 	 */
 	@Override
 	public void addChild(CXSchemaNode node) {
@@ -87,16 +92,18 @@ public class CXSchemaNode extends CXTreeNode<CXSchemaNode> {
 	    result = prime * result + ((name == null) ? 0 : name.hashCode());
 	    return result;
     }
-	
+
 	/**
 	 * The children list must be sorted based on name attribute
-	 * The parent field of the child are not compared.
+	 * The parent field of the child are not compared. This comparasion
+	 * is based on assumption all children nodes are inserted based on
 	 * 
+	 *
 	 * @param l1
 	 * @param l2
 	 * @return
 	 */
-	private boolean compareChildren(List<CXSchemaNode> l1, 
+	private boolean compareChildren(List<CXSchemaNode> l1,
 			List<CXSchemaNode> l2)
 	{
 		if (l1.size() != l2.size())

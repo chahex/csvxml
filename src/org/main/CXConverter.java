@@ -8,79 +8,78 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 import org.CXCSVParser;
-import org.CXCSVSchemaNode;
-import org.CXSchemaExParser;
+import org.CXSchema;
+import org.CXSchemaParser;
 import org.CXmlFormatter;
-import org.Util;
+import org.xml.sax.SAXException;
 
 public class CXConverter {
-	
+
 	private static int FLUSH_THRESHOLD = 1024 * 10;
 
-	
+
 	private static void printf(String format, Object ... args)
 	{
 		System.out.printf(format, args);
 	}
-	
+
 	private static void usage()
 	{
 		printf("CSV to XML converter\n");
 		printf("Usage:\n");
-		printf("cxconverter [src filename] [dst filename] [root element name] [schema expression]\n");
-		printf("It is not necessary to specify schema expression, as the converter will output each line as an entity and each column as its child.\n");
-		printf("When specifying expression, must also specify root element name.\n");
+		printf("cxconverter [src filename] [dst filename] [schema filename]\n");
 	}
-
-	public static void main(String[] args) {
-		
-		if (args.length < 2)
-		{
-			usage();
-			System.exit(0);
-		}
-		
-		if (args.length == 3)
-		{
-			usage();
-			System.exit(1);
-		} 
-
+	
+	/**
+	 * This method takes three file names, then convert the source CSV file
+	 * to XML document and write to file specified by destination file name,
+	 * using the schema that defines mapping between CSV and XML.
+	 * 
+	 * @param sfn source file name, source should be a CSV file
+	 * @param dfn destination file name
+	 * @param schmfn schema file name
+	 * @return status code
+	 */
+	public static int convert(String sfn, String dfn, String schmfn)
+	{
 		BufferedReader in = null;
 		PrintWriter out = null;
 		String rootName = null;
-		String expression = null;
-		CXCSVSchemaNode schemaNode = null;
+		CXSchema schema = null;
 		CXCSVParser parser = new CXCSVParser();
 		CXmlFormatter formatter = new CXmlFormatter();
-		CXSchemaExParser schemaParser = new CXSchemaExParser();
-		String[] colNames = null;
-		
+		CXSchemaParser schemaParser = new CXSchemaParser();
+
 		int charsWritten = 0;
 		
-		if (args.length == 2)
-			rootName = "root";
-		else
-		{
-			rootName = Util.sanityCheck(args[2]);
-			expression = args[3];
-			schemaNode = schemaParser.parseCXSchema(expression);
-		}
-		
 		try{
-			in = new BufferedReader(new FileReader(args[0]));
-			out = new PrintWriter(new FileWriter(args[1]));
-			// the first line should be header
+		schema = schemaParser.parseSchema(schmfn);
+		rootName = schema.getRootName();
+		}catch(IOException e)
+		{
+			printf("Error opening schema file.\n");
+	        e.printStackTrace();
+			return -1;
+		} catch (SAXException e) {
+			printf("Parsing schema error.\n");
+	        e.printStackTrace();
+	        return -2;
+        }
+
+		try{
+
+			in = new BufferedReader(new FileReader(sfn));
+			out = new PrintWriter(new FileWriter(dfn));
+
+			// assume the first line is not header
 			String str = null;
-			str = in.readLine();
-			colNames = str.split(",");
 
 			// ignore writing XML headers now
 			out.printf("<%s>\n", rootName);
 			while ((str = in.readLine()) != null)
 			{
 				String outStr = formatter.formatNode2XML(
-						parser.parseCSV(str, schemaNode, colNames)); 
+						parser.parseCSV(str, schema.getSchemaNode()));
 				out.print(outStr);
 				charsWritten += outStr.length();
 				if (charsWritten >= FLUSH_THRESHOLD)
@@ -92,10 +91,10 @@ public class CXConverter {
 		}catch(FileNotFoundException e)
 		{
 			e.printStackTrace();
-			System.exit(2);
+			return -3;
 		} catch (IOException e) {
 	        e.printStackTrace();
-	        System.exit(3);
+	        return -4;
         } finally
         {
         	try {
@@ -105,6 +104,22 @@ public class CXConverter {
                 e.printStackTrace();
             }
         }
+		return 0;
+
+	}
+
+	public static void main(String[] args) {
 		
-    }
+		// System.exit(100);
+
+		if (args.length < 3)
+		{
+			usage();
+			System.exit(0);
+		}
+		
+		convert(args[0], args[1], args[2]);
+	}
+
+
 }

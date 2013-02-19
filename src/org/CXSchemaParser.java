@@ -15,11 +15,37 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+/**
+ * The CXSchemaParser read the schema as it is defined in XML format and parse
+ * it into CXSchemaNode. The class also provides ways to convert a CXSchema to
+ * a CXNode structure than can be output as XML document.
+ * <br>
+ * {@literal
+ * The definition XML doc should be structurized as an XML document:<br>
+ * <cxroot>								// root element
+ * 		<root_name>RootName</root_name> // output XML root element tag name
+ * 		<cxnode>						// output XML element structure
+ * 			<name></name>				// name of the output tag name
+ * 			<content_src></content_src>	// original CSV column number
+ * 			<children>					// children nodes
+ * 				<cxnode></cxnode>		// iterate over itself
+ * 			</children>
+ * 		</cxnode>
+ * </cxroot>
+ * }<br>
+ * 
+ * If the root name is not specified, then 
+ * {@value org.CXSchema#DEFAULT_ROOT_NAME} will be used as the root node tag
+ * name of the schema.
+ * 
+ * @author xinkaihe
+ *
+ */
 public class CXSchemaParser {
 
 	DocumentBuilderFactory dbf;
 	DocumentBuilder db;
-	
+
 	{
 		dbf = DocumentBuilderFactory
 				.newInstance();
@@ -29,7 +55,7 @@ public class CXSchemaParser {
 	        e.printStackTrace();
         }
 	}
-	
+
 	/**
 	 * @pre e must not be null
 	 * @param e
@@ -50,7 +76,7 @@ public class CXSchemaParser {
 			}
 			// should be a number indicate index of the source column in CSV
 			if (CXSchema.CONTENT_SRC.equals(tagName))
-			{ 
+			{
 				schema.setContentSrc(Integer
 						.parseInt(node.getTextContent().trim()));
 				continue;
@@ -77,23 +103,23 @@ public class CXSchemaParser {
 		}
 		return schema;
 	}
-	
+
 	private CXSchema parseSchema(Document document)
 	{
 		CXSchema schema = new CXSchema();
 		CXSchemaNode schemaNode = null;
-		
+
 		Element root = document.getDocumentElement();
 		// the children of root should be either configurations
 		// or the CXSchema
-		
+
 		NodeList nl = root.getChildNodes();
-		
+
 		for (int i = 0; i<nl.getLength(); i++)
 		{
 			Node elem = nl.item(i);
 			String nodeName = elem.getNodeName();
-			
+
 			if (CXSchema.CXNODE.equals(nodeName))
 			{
 				schemaNode = parseSchemaNode(elem);
@@ -106,33 +132,70 @@ public class CXSchemaParser {
 		return schema;
 	}
 
-	public CXSchema parseSchema(String fileName) 
+	/**
+	 * Parse the schema according to XML specified by fileName<br>
+	 * The XML parsing is achieved using Java's default DocumentBuilder's
+	 * parsing mehtod.
+	 * 
+	 * @param fileName file path of the XML that contains schema definition
+	 * @return CXSchema object of the parsed schema
+	 * @throws SAXException if XML parsig error
+	 * @throws IOException if file operation error
+	 */
+	public CXSchema parseSchema(String fileName)
 			throws SAXException, IOException
 	{
 		Document document = db.parse(new File(fileName));
 		return parseSchema(document);
 	}
-	
-	public CXSchema parseSchema(InputStream in) 
+
+	/**
+	 * Parse the schema defined in the XML document that from the input stream.
+	 * The XML parsing is acheived by calling Java's default DocumentBuilder's
+	 * parsing method.
+	 * 
+	 * 
+	 * @param in
+	 * @return
+	 * @throws SAXException
+	 * @throws IOException
+	 */
+	public CXSchema parseSchema(InputStream in)
 			throws SAXException, IOException
 	{
 		Document document = db.parse(in);
 		return parseSchema(document);
 	}
-	
+
+	/**
+	 * Generate the CXNode strucutre that can be used to output the schema
+	 * as an XML document that equivalent to the schema passed in 
+	 * in the form defined at {@link CXSchemaParser}. 
+	 *
+	 * @param schema
+	 * @return
+	 */
 	public CXNode generateCXNodeFromSchema(CXSchema schema)
 	{
 		assert(schema != null);
-		
+
 		CXNode node = new CXNode(CXSchema.CXROOT);
 		CXNode rootNameNode = new CXNode(CXSchema.ROOT_NAME);
 		rootNameNode.setContent(schema.getRootName());
-		
+
 		node.addChild(rootNameNode);
 		node.addChild(generateCXNodeFromSchemaNode(schema.getSchemaNode()));
 		return node;
 	}
-	
+
+	/**
+	 * Generate the CXNode strucutre that can be used to output the 
+	 * CXSchemaNode an XML document that equivalent to the schema passed in 
+	 * in the form defined at {@link CXSchemaParser}. 
+	  
+	 * @param schemaNode
+	 * @return
+	 */
 	public CXNode generateCXNodeFromSchemaNode(CXSchemaNode schemaNode)
 	{
 		assert(schemaNode != null);
@@ -143,7 +206,7 @@ public class CXSchemaParser {
 
 		nameNode.setContent(schemaNode.getName());
 		ctsrcNode.setContent(String.valueOf(schemaNode.getContentSrc()));
-		
+
 		node.addChild(nameNode);
 		node.addChild(ctsrcNode);
 
@@ -162,7 +225,7 @@ public class CXSchemaParser {
 		}
 		return node;
 	}
-	
+
 	public static void main(String[] args) throws Exception{
 	    CXSchemaParser parser = new CXSchemaParser();
 	    System.out.println(parser.parseSchema("schema.xml"));

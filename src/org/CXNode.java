@@ -1,16 +1,20 @@
 package org;
 
 /**
- * Basic structure of document. An node have string content, a list of 
- * child nodes and attributes.
- * 
- * 
+ * Basic structure of document. Translated directly to tag in the output XML.
+ * Attributes include：
+ * <br>
+ *  * tag name,<br> 
+ *  * a list of attributes (not implemented yet),<br> 
+ *  * text content (similar to TEXT_NODE node type with W3C XML node type)<br> 
+ *
+ *
  * @author xinkaihe
  *
  */
 public class CXNode extends CXTreeNode<CXNode>{
-	
-	java.util.Map<String, String> attributes; 
+
+	java.util.Map<String, String> attributes;
 			//= new java.util.HashMap<String, String>();
 
 	String name;
@@ -32,19 +36,19 @@ public class CXNode extends CXTreeNode<CXNode>{
     }
 
 	String content;
-	
+
 	public CXNode(String name)
 	{
 		this.name = name;
 	}
-	
+
 	public void addAttribute(String key, String val)
 	{
 		if (attributes == null)
 			attributes = new java.util.HashMap<String, String>();
 		attributes.put(key, val);
 	}
-	
+
 	public String removeAttribute(String key)
 	{
 		throw new RuntimeException("Method not implemented.");

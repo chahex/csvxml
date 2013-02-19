@@ -4,18 +4,18 @@ import java.util.List;
 
 /**
  * Format XML output based on document structure defined by CXNode tree.
- * Currently does not support attribute output. 
- * 
+ * Currently does not support attribute output.
+ *
  * @author xinkaihe
  *
  */
 public class CXmlFormatter {
-	
+
 	private StringBuilder formatXML(CXNode node, StringBuilder sb)
 	{
 		assert(sb != null);
 		assert(node != null);
-		
+
 		String name = Util.sanityCheck(node.getName());
 		sb.append(String.format("<%s", name));
 		boolean firstTagEnded = false;
@@ -24,13 +24,12 @@ public class CXmlFormatter {
 		if (content != null && content.length() != 0)
 		{
 			content = Util.sanityCheck(content);
-			sb.append(">").append(content)
-				.append("");
+			sb.append(">").append(content);
 			firstTagEnded = true;
 		}
 
 		List<CXNode> children = node.getChildren();
-		if (children != null && children.size() >= 0)
+		if (children != null && children.size() > 0)
 		{
 			if (!firstTagEnded)
 			{
@@ -44,7 +43,7 @@ public class CXmlFormatter {
 				sb = formatXML(child, sb);
 			}
 		}
-		
+
 		if (!firstTagEnded)
 		{
 			sb.append("/>\n");
@@ -54,7 +53,7 @@ public class CXmlFormatter {
 		}
 		return sb;
 	}
-	
+
 	public String formatNode2XML(CXNode node)
 	{
 		StringBuilder sb = new StringBuilder();

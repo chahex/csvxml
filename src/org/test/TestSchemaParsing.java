@@ -20,21 +20,21 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class TestSchemaParsing {
-	
+
 	CXSchemaParser schemaParser = new CXSchemaParser();
 	CXCSVParser csvParser = new CXCSVParser();
 	CXmlFormatter formatter = new CXmlFormatter();
-	
+
 	@Before
 	public void setUp()
 	{
 	}
-	
+
 	@After
 	public void tearDown()
 	{
 	}
-	
+
 	@Test
 	public void testCXNodeGeneration()
 	{
@@ -48,7 +48,7 @@ public class TestSchemaParsing {
 		 */
 		for (int i = 1; i <= 1000; i++)
 		{
-			assertTrue(testCXNodeGeneration(i));
+			testCXNodeGeneration(i);
 		}
 	}
 
@@ -79,50 +79,56 @@ public class TestSchemaParsing {
 			ByteArrayInputStream bis = new ByteArrayInputStream(obytes);
 			CXSchema schema2 = schemaParser.parseSchema(bis);
 			assertEquals(schema, schema2);
+			bis.close();
 		}
 	}
-	
+
 	private void outputSchema2XML(CXSchema schema,
-			CXmlFormatter formatter, 
+			CXmlFormatter formatter,
 			OutputStreamWriter writer)
 	throws IOException
 	{
 		assert(schema != null);
 		assert(writer != null);
-		
-		CXNode node = 
+
+		CXNode node =
 				schemaParser.generateCXNodeFromSchema(schema);
 		writer.append(formatter.formatNode2XML(node));
 	}
 
-	private boolean testCXNodeGeneration(int colSize)
+	/**
+	 * The structure of CXNode should be defined by CXSchemaNode.
+	 * Which means:
+	 	The name of the 
+	 * 
+	 * 
+	 * @param colSize
+	 */
+	private void testCXNodeGeneration(int colSize)
 	{
 		String[] columns = Reuse.generateStringColumn(colSize);
 		SchemaGenConf conf = new SchemaGenConf(colSize);
 		CXSchemaNode schema = Reuse.generateRandomSchemaNode(conf);
 		CXNode cxnode = csvParser.parseCSV(columns, schema);
 		CXSchemaNode schema2 = inferSchemaNode(cxnode);
-		return schema.equals(schema2);
+		assertEquals(schema, schema2);
 	}
-
-
 
 	private CXSchemaNode inferSchemaNode(CXNode node)
 	{
 		int maxContentSrc = 0;
-		// find the biggest index number as well
 		int nodeChildrenSize = node.childrenCount();
 		int contentSrc = Integer.parseInt(node.getContent());
-		
+
 		if (contentSrc > maxContentSrc)
 			maxContentSrc = contentSrc;
 
 		String name = node.getName();
 		CXSchemaNode schema = new CXSchemaNode();
-		
+
 		schema.setName(name);
 		schema.setContentSrc(contentSrc);
-		
+
 		if (nodeChildrenSize > 0)
 		{
 			List<CXNode> nodeChildren = node.getChildren();
@@ -131,12 +137,12 @@ public class TestSchemaParsing {
 				schema.addChild(inferSchemaNode(nodeChildren.get(i)));
 			}
 		}
-		
+
 		return schema;
 	}
-	
 
-	
+
+
 }
 
 

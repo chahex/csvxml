@@ -14,7 +14,7 @@ public class SchemaGenConf
 
 	int colRemoved;
 	int nodeCount;
-	
+
 	public SchemaGenConf(int colSize) {
 		if (colSize <= 0)
 			throw new IllegalArgumentException("Column size should > 0");
@@ -22,14 +22,14 @@ public class SchemaGenConf
 		this.colSize = colSize;
 		this.maxDepth = Reuse.rdm.nextInt(Reuse.MAX_TREE_DEPTH);
 		this.maxChildren = Reuse.rdm.nextInt(Reuse.MAX_SIBLINGS);
-		
+
 		this.nodeCount = 0;
 		this.colRemoved = 0;
-		
+
 		this.availableColumns = new ArrayList<Integer>(colSize);
 		initAvailCols();
     }
-	
+
 	private void initAvailCols()
 	{
 		for (int i = 0; i < colSize; i++)
@@ -38,7 +38,7 @@ public class SchemaGenConf
 		}
 		Collections.shuffle(availableColumns);
 	}
-	
+
 	public int nextColumnIndex()
 	{
 		if (availableColumns.size() > 0)
