@@ -1,5 +1,6 @@
 package org;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -15,40 +16,14 @@ import java.util.List;
  * @author xinkaihe
  *
  */
-public class CXSchemaNode extends CXTreeNode<CXSchemaNode> {
+public class CXSchemaNode extends CXTreeNode<CXSchemaNode> 
+implements Comparable<CXSchemaNode> {
 
 	// can't be null or empty
-	private String name = "";
+	private String name = CXSchema.DEFAULT_NODE_NAME;
 	// must have a valid value that related to a specific column in the CSV
 	// file
 	private Integer contentSrc;
-
-	/**
-	 * The overriden method will sort the children array while inserting.
-	 * However, the CXTreeNode(super)'s addChild method will easily 
-	 * disrupt this order if called upon this object using reflection.
-	 */
-	@Override
-	public void addChild(CXSchemaNode node) {
-		assert(node != null);
-		int i = 0;
-		int chldSize = this.children.size();
-		boolean found = false;
-		for (i = 0; i < chldSize; i++)
-		{
-			CXSchemaNode child = children.get(i);
-			if (child.getName().compareTo(node.getName()) > 0)
-			{
-				found = true;
-				break;
-			}
-		}
-		if (found)
-			children.add(i, node);
-		else
-			children.add(node);
-		node.parent = this;
-	}
 
 	public String getName() {
 		return name;
@@ -58,9 +33,19 @@ public class CXSchemaNode extends CXTreeNode<CXSchemaNode> {
 		return contentSrc;
 	}
 
+	/**
+	 * 
+	 * @param name
+	 * @throws <code>NullPointerException</code> If name is null
+	 * @throws <code>IllegalArgumentException</code> If name is empty string
+	 */
 	public void setName(String name) {
 		if (name == null)
-			throw new NullPointerException("Name of schema node can't be null.");
+			throw new 
+			NullPointerException("Name of schema node can't be null.");
+		if (name.length() == 0)
+			throw new 
+			IllegalArgumentException("Name of schema node can't be empty.");
 		this.name = name;
 	}
 
@@ -94,32 +79,46 @@ public class CXSchemaNode extends CXTreeNode<CXSchemaNode> {
     }
 
 	/**
-	 * The children list must be sorted based on name attribute
-	 * The parent field of the child are not compared. This comparasion
-	 * is based on assumption all children nodes are inserted based on
+	 * Compare equality of children, a sort is executed thus sequence of child
+	 * is not considered.
 	 * 
-	 *
-	 * @param l1
-	 * @param l2
+	 * @param n1
+	 * @param n2
 	 * @return
 	 */
-	private boolean compareChildren(List<CXSchemaNode> l1,
-			List<CXSchemaNode> l2)
+	private boolean compareChildren(CXSchemaNode n1, CXSchemaNode n2)
 	{
-		if (l1.size() != l2.size())
+		int size = n1.childrenCount();
+		if (size != n2.childrenCount())
 		{
 			return false;
 		}
-		for (int i = 0; i < l1.size(); i++)
+		
+		List<CXSchemaNode> cl1 = n1.getChildren();
+		List<CXSchemaNode> cl2 = n2.getChildren();
+		
+		Collections.sort(cl1);
+		Collections.sort(cl2);
+
+		for (int i = 0; i < size; i++)
 		{
-			CXSchemaNode n1 = l1.get(i);
-			CXSchemaNode n2 = l2.get(i);
-			if (!n1.equals(n2))
+			CXSchemaNode sn1 = cl1.get(i);
+			CXSchemaNode sn2 = cl2.get(i);
+			if (sn1.compareTo(sn2) != 0)
+			{
 				return false;
+			}
 		}
 		return true;
 	}
 
+	/**
+	 * Two schema nodes are equal if and only if
+	 * * They are the same object
+	 * * The contentSrc fields are same
+	 * * The name fields are same
+	 * * The children schemas are same
+	 */
 	@Override
     public boolean equals(Object obj) {
 	    if (this == obj)
@@ -139,6 +138,38 @@ public class CXSchemaNode extends CXTreeNode<CXSchemaNode> {
 			    return false;
 	    } else if (!name.equals(other.name))
 		    return false;
-	    return compareChildren(this.children, other.children);
+	    return compareChildren(this, other);
+    }
+
+	/**
+	 * Comparison of two schema nodes are solely 
+	 * based on name and contentSrc attributes.<br>
+	 * <br>
+	 * if this.name.compareTo(n.name) does not equal to 0
+	 * return the comparsion result<br>
+	 * 
+	 * if one of the contentSrc attribute is null, it is smaller
+	 * if both are null, return 0
+	 * Otherwise return this.contentSrc.compareTo(n.contentSrc)
+	 * 
+	 * @return comparsion result
+	 */
+	@Override
+    public int compareTo(CXSchemaNode n) {
+		int result = this.name.compareTo(n.name);
+
+		if (result != 0)
+		{
+			return result;
+		}
+		if (this.contentSrc != null && n.contentSrc != null)
+		{
+			return this.contentSrc.compareTo(n.contentSrc);
+		}
+		if (this.contentSrc != null)
+			return 1;
+		if (n.contentSrc != null)
+			return -1;
+	    return 0;
     }
 }

@@ -6,13 +6,13 @@ import org.junit.Test;
 
 public class TestReuse {
 
-	//@Test
+	@Test
 	/**
 	 * Test randomly generated CSVLine.
 	 */
 	public void testRandomCSVLine()
 	{
-		for (int i = 1; i<=10000; i++)
+		for (int i = 1; i<=1000; i++)
 		{
 			String str = Reuse.generateRandomCSVLine(100);
 			String[] strs = str.split(CXCSVParser.CSV_SEPARATOR);

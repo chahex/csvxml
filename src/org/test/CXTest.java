@@ -59,9 +59,9 @@ public class CXTest {
 	 *
 	 * @throws Exception
 	 */
-	//@Test
+	@Test
 	public void test() throws Exception{
-		for (int i = 0; i < 100; i++)
+		for (int i = 0; i < 10; i++)
 			test_whole_process();
 	}
 
@@ -71,7 +71,7 @@ public class CXTest {
 	 * @throws IOException
 	 * @throws SAXException
 	 */
-	@Test
+	//@Test
 	public void test_whole_process()
 			throws IOException, SAXException
 	{
@@ -125,10 +125,41 @@ public class CXTest {
 		// schema generated. Return code should be 0 indicating success
 		assertEquals(0, CXConverter.convert(csvfn, xmlfn, schmfn));
 
-		// read the generated XML file
-		Document doc = Reuse.db.parse(xmlf);
-		Element root = doc.getDocumentElement();
+		// compare the generated with original file
+		cxCompareTest(csvf, xmlf, schema);
 
+		// delete after test
+		assertTrue(csvf.delete() & schmf.delete() & xmlf.delete());
+	}
+	
+	@Test
+	public void testCase()
+	throws Exception
+	{
+		CXSchema schema = schemaParser.parseSchema("schema.xml");
+		//System.out.println(schema.getSchemaNode());
+		cxCompareTest(new File("mock_csv_small.csv"), 
+				new File("out_small.xml"), 
+				schema);
+	}
+
+	/**
+	 * Attention: the input xml file must be small to perform this test  
+	 * since the DOM is building the netire XML tree.
+	 * 
+	 * @param cf
+	 * @param xf
+	 * @param schema
+	 * @throws IOException
+	 * @throws SAXException
+	 */
+	private void cxCompareTest(File cf, File xf, CXSchema schema)
+	throws IOException, SAXException
+	{
+		// read the generated XML file
+		Document doc = Reuse.db.parse(xf);
+		Element root = doc.getDocumentElement();
+		
 		// root name of the XML generated should be as defined 
 		assertEquals(schema.getRootName(), root.getTagName());
 
@@ -144,19 +175,18 @@ public class CXTest {
 		int i = 0;
 		BufferedReader in = null;
 		try{
-				in = new BufferedReader(new FileReader(csvf));
+		in = new BufferedReader(new FileReader(cf));
 		String str = null;
 		while ((str = in.readLine()) != null)
 		{
 			Node child = null;
+			// #text node may exist
 			while((child = nl.item(i++)).getNodeType() != Node.ELEMENT_NODE);
 			Reuse.compareTest(child, schema.getSchemaNode(), str);
 		}
 		}finally{
 			in.close();
 		}
-		//assertTrue(csvf.delete() & schmf.delete() & xmlf.delete());
-		
 	}
 
 }

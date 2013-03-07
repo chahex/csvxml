@@ -22,7 +22,7 @@ public class TestCSVParsing {
 	public void testCSVParsing()
 	{
 		/**
-		 * 1. Generate columns
+		 * 1. Generate size of columns
 		 * 2. Generate random schema
 		 * 3. Generate a line of column content
 		 * 4. Parse it using schema to CXNode

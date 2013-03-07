@@ -6,7 +6,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.util.List;
 
 import org.CXCSVParser;
 import org.CXNode;
@@ -19,6 +18,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Test that schema can work with
+ *
+ * @author xinkaihe
+ *
+ */
 public class TestSchemaParsing {
 
 	CXSchemaParser schemaParser = new CXSchemaParser();
@@ -36,24 +41,7 @@ public class TestSchemaParsing {
 	}
 
 	@Test
-	public void testCXNodeGeneration()
-	{
-		/**
-		 *  1. generate column size
-		 *  2. generate string array with that size
-		 *  3. generate random CXSchemaNode based on column size
-		 *  4. generate a CXNode based on the CXSchemaNode - 1 and the columns
-		 *  5. extract CXSchemaNode - 2 from CXNode generated
-		 *  6. - 1 must be equal to -2
-		 */
-		for (int i = 1; i <= 1000; i++)
-		{
-			testCXNodeGeneration(i);
-		}
-	}
-
-	@Test
-	public void testCXSchema()
+	public void testCXSchemaParsing()
 	throws Exception
 	{
 		/**
@@ -95,53 +83,6 @@ public class TestSchemaParsing {
 				schemaParser.generateCXNodeFromSchema(schema);
 		writer.append(formatter.formatNode2XML(node));
 	}
-
-	/**
-	 * The structure of CXNode should be defined by CXSchemaNode.
-	 * Which means:
-	 	The name of the 
-	 * 
-	 * 
-	 * @param colSize
-	 */
-	private void testCXNodeGeneration(int colSize)
-	{
-		String[] columns = Reuse.generateStringColumn(colSize);
-		SchemaGenConf conf = new SchemaGenConf(colSize);
-		CXSchemaNode schema = Reuse.generateRandomSchemaNode(conf);
-		CXNode cxnode = csvParser.parseCSV(columns, schema);
-		CXSchemaNode schema2 = inferSchemaNode(cxnode);
-		assertEquals(schema, schema2);
-	}
-
-	private CXSchemaNode inferSchemaNode(CXNode node)
-	{
-		int maxContentSrc = 0;
-		int nodeChildrenSize = node.childrenCount();
-		int contentSrc = Integer.parseInt(node.getContent());
-
-		if (contentSrc > maxContentSrc)
-			maxContentSrc = contentSrc;
-
-		String name = node.getName();
-		CXSchemaNode schema = new CXSchemaNode();
-
-		schema.setName(name);
-		schema.setContentSrc(contentSrc);
-
-		if (nodeChildrenSize > 0)
-		{
-			List<CXNode> nodeChildren = node.getChildren();
-			for (int i = 0; i < nodeChildrenSize; i++)
-			{
-				schema.addChild(inferSchemaNode(nodeChildren.get(i)));
-			}
-		}
-
-		return schema;
-	}
-
-
 
 }
 

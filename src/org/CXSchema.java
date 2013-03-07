@@ -25,12 +25,12 @@ package org;
 public class CXSchema {
 
 	public static final String DEFAULT_ROOT_NAME = "root";
+	public static final String DEFAULT_NODE_NAME = "node";
 
 	public static final String CXROOT = "cx";
 	public static final String ROOT_NAME = "root_name";
 	public static final String CXNODE = "cxnode";
 	public static final String CXNODE_NAME = "name";
-	public static final String CHILDREN = "children";
 	public static final String CONTENT_SRC = "contentsrc";
 
 	private String rootName = DEFAULT_ROOT_NAME;

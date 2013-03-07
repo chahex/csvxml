@@ -11,6 +11,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -27,12 +28,16 @@ import org.xml.sax.SAXException;
  * 		<cxnode>						// output XML element structure
  * 			<name></name>				// name of the output tag name
  * 			<content_src></content_src>	// original CSV column number
- * 			<children>					// children nodes
- * 				<cxnode></cxnode>		// iterate over itself
- * 			</children>
+ * 				<cxnode></cxnode>		// iterate over itself 
+ * 										// for children nodes
  * 		</cxnode>
  * </cxroot>
  * }<br>
+ * 
+ * The name and contentsrc can also be attribtues. But child node's value will
+ * over write the value set by attribtue.
+ * <br>
+ * Note: Setting null or empty value to name is not accepted.
  * 
  * If the root name is not specified, then 
  * {@value org.CXSchema#DEFAULT_ROOT_NAME} will be used as the root node tag
@@ -63,7 +68,28 @@ public class CXSchemaParser {
 	private CXSchemaNode parseSchemaNode(Node e)
 	{
 		CXSchemaNode schema = new CXSchemaNode();
+		NamedNodeMap nm = e.getAttributes();
 		NodeList nl = e.getChildNodes();
+		
+		// set name and text content according to attribute
+		for (int i = 0; i < nm.getLength(); i++)
+		{
+			Node attr = nm.item(i);
+			String attrn = attr.getNodeName();
+			if (CXSchema.CXNODE_NAME.equals(attrn))
+			{
+				schema.setName(attr.getTextContent().trim());
+				continue;
+			}
+			if (CXSchema.CONTENT_SRC.equals(attrn))
+			{
+				schema.setContentSrc(Integer.parseInt(attr
+						.getTextContent().trim()));
+				continue;
+			}
+		}
+		
+		// set according to child nodes
 		for (int i = 0; i < nl.getLength(); i++)
 		{
 			Node node = nl.item(i);
@@ -82,23 +108,17 @@ public class CXSchemaParser {
 				continue;
 			}
 			// child structure
-			if (CXSchema.CHILDREN.equals(tagName))
+			// children schema node should be cxnode only
+			// however, any white space will cause #text to be inserted
+			if (CXSchema.CXNODE.equals(tagName))
 			{
-				NodeList childList = node.getChildNodes();
-				for (int j = 0; j < childList.getLength(); j++)
-				{
-					Node child = childList.item(j);
-					// children schema node should be cxnode only
-					// however, any white space will cause #text to be inserted
-					if (CXSchema.CXNODE.equals(child.getNodeName()))
-						schema.addChild(parseSchemaNode(child));
-					else
-					{	// Log
-						// System.out.printf("Unsupported child nodes:%s",
-						//		child.getNodeName());
-					}
-				}
+				schema.addChild(parseSchemaNode(node));
 				continue;
+			}
+			else
+			{	// Log
+				// System.out.printf("Unsupported child nodes:%s",
+				//		node.getNodeName());
 			}
 		}
 		return schema;
@@ -210,16 +230,13 @@ public class CXSchemaParser {
 		node.addChild(nameNode);
 		node.addChild(ctsrcNode);
 
-		CXNode childrenNode = new CXNode(CXSchema.CHILDREN);
-
 		int schemaChildCount = schemaNode.childrenCount();
 		if (schemaChildCount > 0)
 		{
-			node.addChild(childrenNode);
 			List<CXSchemaNode> schemaChildren = schemaNode.getChildren();
 			for (int i = 0; i < schemaChildCount; i++)
 			{
-				childrenNode.addChild(
+				node.addChild(
 						generateCXNodeFromSchemaNode(schemaChildren.get(i)));
 			}
 		}
